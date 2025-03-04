@@ -1,0 +1,18 @@
+{
+  "exclude": ["node_modules", "lib"],
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "rootDir": "./",
+    "sourceMap": true,
+    "outDir": "./lib",
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "strictBindCallApply": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "noEmitOnError": false
+  }
+}

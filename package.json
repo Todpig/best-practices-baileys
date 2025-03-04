@@ -1,0 +1,25 @@
+{
+  "name": "test-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./lib/main.js",
+    "build": "npx tsc",
+    "dev": "npm run build && node ./lib/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "baileys": "^6.7.15",
+    "express": "^4.21.2",
+    "mongodb": "^6.14.1",
+    "qrcode-terminal": "^0.12.0",
+    "worker-threads": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "typescript": "^5.8.2"
+  }
+}
