@@ -19,8 +19,16 @@ export class Socket {
       browser: Browsers.macOS("Desktop"),
       logger: this.logger,
       syncFullHistory: false,
-      linkPreviewImageThumbnailWidth: 800,
+      linkPreviewImageThumbnailWidth: 852,
       printQRInTerminal: true,
+      generateHighQualityLinkPreview: true,
+      markOnlineOnConnect: true,
+      connectTimeoutMs: 360000,
+      keepAliveIntervalMs: 15000,
+      retryRequestDelayMs: 100,
+      options: {
+        timeout: 240000,
+      },
     };
   }
 
