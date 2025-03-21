@@ -6,14 +6,8 @@ import { SessionService } from "./src/services/SessionService";
   await service.sendText(
     "teste",
     {
-      text: "vambora!!‼️\n📦 Frete Grátis Amazon Prime\n🔥 R$ 22,45 À vista no Pix e boleto\n❤️ REAGE AQUI SE VOCÊ GOSTOU!\\\\n🛒 https://pechinchou.com.br/oferta/59318",
-      linkPreview: {
-        "canonical-url": "https://pechinchou.com.br/oferta/59318",
-        "matched-text": "https://pechinchou.com.br/oferta/59318",
-        title: "📦 Frete Grátis Amazon Prime",
-        description: "🔥 R$ 22,45 À vista no Pix e boleto",
-      },
+      text: "Teste",
     },
-    ["558496783580@s.whatsapp.net"]
+    ["558899999999@s.whatsapp.net"]
   );
 })();
