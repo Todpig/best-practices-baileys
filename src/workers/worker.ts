@@ -11,7 +11,7 @@ interface SignalActions {
 let session: Session;
 
 const formatMessage = {
-  text: (text: string) => ({ text }),
+  text: ({ text, linkPreview }: any) => ({ text, linkPreview }),
   image: ({ url, text }: any) => ({
     image: { url },
     caption: text,
@@ -54,7 +54,6 @@ async function genericSend<T>(
     }
   }
 }
-
 const signalsActions: SignalActions = {
   start: async ({ sessionId }: any) => {
     session = new Session(sessionId);
@@ -64,8 +63,8 @@ const signalsActions: SignalActions = {
       data: { qrcode, status },
     });
   },
-  sendText: async ({ header, text }: any) => {
-    await genericSend(header.receivers, text, formatMessage["text"]);
+  sendText: async ({ receivers, text, linkPreview }: any) => {
+    await genericSend(receivers, { text, linkPreview }, formatMessage["text"]);
   },
   close: async () => {
     if (!session) return;

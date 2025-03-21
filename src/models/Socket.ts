@@ -25,7 +25,7 @@ export class Socket {
       markOnlineOnConnect: true,
       connectTimeoutMs: 360000,
       keepAliveIntervalMs: 15000,
-      retryRequestDelayMs: 100,
+      retryRequestDelayMs: 500,
       options: {
         timeout: 240000,
       },

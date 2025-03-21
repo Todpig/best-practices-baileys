@@ -1,4 +1,4 @@
-import { DisconnectReason, WASocket } from "baileys";
+import { DisconnectReason, ParticipantAction, WASocket } from "baileys";
 import { Boom } from "@hapi/boom";
 import { Socket } from "./Socket";
 
@@ -68,5 +68,15 @@ export class Session {
       });
       this.waSocket!.ev.on("contacts.upsert", async (contacts) => {});
     });
+  }
+
+  async updateGroupParticipants(
+    groupId: string,
+    participants: string[],
+    action: ParticipantAction
+  ) {
+    const socket = this.socket.getSocket();
+    if (!socket) return;
+    return await socket.groupParticipantsUpdate(groupId, participants, action);
   }
 }

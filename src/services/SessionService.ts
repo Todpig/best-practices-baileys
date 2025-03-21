@@ -1,5 +1,6 @@
 import { Worker } from "worker_threads";
 import { resolve } from "path";
+import { AnyMessageContent } from "baileys";
 
 export class SessionService {
   private sessions: Map<string, Worker> = new Map<string, Worker>();
@@ -49,5 +50,16 @@ export class SessionService {
     } catch (error: any) {}
   }
 
-  async sendText(){}
+  async sendText(
+    sessionId: string,
+    message: AnyMessageContent,
+    receivers: string[]
+  ) {
+    const worker = this.sessions.get(sessionId);
+    if (!worker) return;
+    worker.postMessage({
+      type: "sendText",
+      data: { ...message, receivers },
+    });
+  }
 }
