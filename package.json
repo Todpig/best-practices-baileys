@@ -12,7 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "baileys": "^6.7.15",
+    "baileys": "^6.7.16",
     "express": "^4.21.2",
     "mongodb": "^6.14.1",
     "qrcode-terminal": "^0.12.0",
