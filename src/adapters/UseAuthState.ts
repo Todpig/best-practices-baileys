@@ -4,6 +4,8 @@ import {
   initAuthCreds,
   BufferJSON,
   proto,
+  makeCacheableSignalKeyStore,
+  SignalKeyStore,
 } from "baileys";
 import { MongoClient, Collection } from "mongodb";
 import { Logger } from "pino";
@@ -41,13 +43,13 @@ export class UseAuthState {
 
     const saveKey = async (type: string, key: string, value: any) => {
       this.logger.debug(
-        `Storing key whatsappId: ${this.sessionId} type: ${type} key: ${key}`
+        `Storing key whatsappId: ${this.sessionId} type: ${type} key: ${key}`,
       );
       try {
         await this.keys.updateOne(
           { sessionId: this.sessionId, type, key },
           { $set: { value: JSON.stringify(value) } },
-          { upsert: true }
+          { upsert: true },
         );
       } catch (error: any) {
         this.logger.error(`Error storing key: ${error.message}`);
@@ -64,7 +66,7 @@ export class UseAuthState {
         this.logger.debug(
           `${result ? "Successfully" : "Failed to"} recover key whatsappId: ${
             this.sessionId
-          } type: ${type} key: ${key}`
+          } type: ${type} key: ${key}`,
         );
         return result ? JSON.parse(result.value) : null;
       } catch (error: any) {
@@ -75,7 +77,7 @@ export class UseAuthState {
 
     const removeKey = async (type: string, key: string) => {
       this.logger.debug(
-        `Deleting key whatsappId: ${this.sessionId} type: ${type} key: ${key}`
+        `Deleting key whatsappId: ${this.sessionId} type: ${type} key: ${key}`,
       );
       try {
         await this.keys.deleteOne({
@@ -97,12 +99,12 @@ export class UseAuthState {
               session: JSON.stringify(
                 { creds: this.creds, keys: {} },
                 BufferJSON.replacer,
-                0
+                0,
               ),
             },
             $setOnInsert: {},
           },
-          { upsert: true }
+          { upsert: true },
         );
       } catch (error: any) {
         this.logger.error(`Erro ao salvar estado da sessão: ${error.message}`);
@@ -140,44 +142,46 @@ export class UseAuthState {
       }
     }
 
+    const keyStore: SignalKeyStore = {
+      get: async <T extends keyof SignalDataTypeMap>(
+        type: T,
+        ids: string[],
+      ) => {
+        const data: { [id: string]: SignalDataTypeMap[T] } = {};
+        for (const id of ids) {
+          let value = await getKey(type, id);
+          if (value && type === "app-state-sync-key") {
+            value = proto.Message.AppStateSyncKeyData.create(value);
+          }
+          data[id] = value as SignalDataTypeMap[T];
+        }
+        return data;
+      },
+
+      set: async (data: Record<string, Record<string, any>>) => {
+        const tasks: Promise<void>[] = [];
+        for (const category in data) {
+          for (const id in data[category]) {
+            const value = data[category][id];
+            tasks.push(
+              value ? saveKey(category, id, value) : removeKey(category, id),
+            );
+          }
+        }
+        await Promise.all(tasks);
+      },
+      clear: async () => {
+        try {
+          await this.keys.deleteMany({ sessionId: this.sessionId });
+          await this.sessions.deleteMany({ sessionId: this.sessionId });
+        } catch (error: any) {}
+      },
+    };
+
     return {
       state: {
         creds: this.creds,
-        keys: {
-          get: async <T extends keyof SignalDataTypeMap>(
-            type: T,
-            ids: string[]
-          ) => {
-            const data: { [id: string]: SignalDataTypeMap[T] } = {};
-            for (const id of ids) {
-              let value = await getKey(type, id);
-              if (value && type === "app-state-sync-key") {
-                value = proto.Message.AppStateSyncKeyData.fromObject(value);
-              }
-              data[id] = value as SignalDataTypeMap[T];
-            }
-            return data;
-          },
-
-          set: async (data: Record<string, Record<string, any>>) => {
-            const tasks: Promise<void>[] = [];
-            for (const category in data) {
-              for (const id in data[category]) {
-                const value = data[category][id];
-                tasks.push(
-                  value ? saveKey(category, id, value) : removeKey(category, id)
-                );
-              }
-            }
-            await Promise.all(tasks);
-          },
-          clear: async () => {
-            try {
-              await this.keys.deleteMany({ sessionId: this.sessionId });
-              await this.sessions.deleteMany({ sessionId: this.sessionId });
-            } catch (error: any) {}
-          },
-        },
+        keys: makeCacheableSignalKeyStore(keyStore, this.logger),
       },
       saveState,
     };

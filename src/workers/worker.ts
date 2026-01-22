@@ -1,11 +1,25 @@
 import { parentPort } from "worker_threads";
 import { Session } from "../models/Session";
 import { fakeTyping } from "../utils/global";
+import { WASocket } from "baileys";
 
 interface SignalActions {
   start: ({ sessionId }: any) => Promise<void>;
   sendText: ({ header, text }: any) => Promise<void>;
   close: () => Promise<void>;
+}
+
+async function getJid(sock: WASocket, phone: string) {
+  const formattedPhone = phone.replace(/[^0-9]/g, "");
+
+  const result = await sock?.onWhatsApp(formattedPhone);
+
+  if (result && result.length > 0) {
+    const [{ jid }] = result;
+    return jid;
+  }
+
+  return null;
 }
 
 let session: Session;
@@ -28,7 +42,7 @@ const formatMessage = {
 async function genericSend<T>(
   receivers: string[],
   content: T,
-  formatMessage: (content: T) => any
+  formatMessage: (content: T) => any,
 ) {
   if (!session)
     return parentPort?.postMessage({
@@ -45,9 +59,10 @@ async function genericSend<T>(
   for (const chat of receivers) {
     try {
       const socket = session.getWASocket();
-      await fakeTyping(socket, chat);
+      const JID = await getJid(socket, chat);
+      await fakeTyping(socket, JID as string);
       const formattedMessage = formatMessage(content);
-      await socket?.sendMessage(chat, formattedMessage);
+      await socket?.sendMessage(JID as string, formattedMessage);
       progress.sentChats++;
     } catch (error) {
       progress.unsentChats++;
@@ -92,5 +107,5 @@ parentPort?.on(
     } catch (error: any) {
       parentPort?.postMessage({ type: "error", data: error.message });
     }
-  }
+  },
 );

@@ -1,6 +1,7 @@
 import { DisconnectReason, ParticipantAction, WASocket } from "baileys";
 import { Boom } from "@hapi/boom";
 import { Socket } from "./Socket";
+import qrcode from "qrcode-terminal";
 
 interface SessionConnectionProps {
   socket: WASocket;
@@ -44,6 +45,7 @@ export class Session {
         if (connection === "close") {
           if (DisconnectReason.restartRequired == statusCode)
             return this.connect();
+
           resolve({
             socket: this.waSocket!,
             qrcode: "",
@@ -54,6 +56,7 @@ export class Session {
           setTimeout(() => {
             if (!this.isConnected) console.log("Vou deletar");
           }, 50 * 1000);
+          qrcode.generate(qr, { small: true });
           resolve({
             socket: this.waSocket!,
             qrcode: qr,
@@ -73,7 +76,7 @@ export class Session {
   async updateGroupParticipants(
     groupId: string,
     participants: string[],
-    action: ParticipantAction
+    action: ParticipantAction,
   ) {
     const socket = this.socket.getSocket();
     if (!socket) return;

@@ -16,19 +16,16 @@ export class Socket {
   constructor(sessionId: string) {
     this.sessionId = sessionId;
     this.socketOptions = {
-      browser: Browsers.macOS("Desktop"),
-      logger: this.logger,
       syncFullHistory: false,
-      linkPreviewImageThumbnailWidth: 852,
-      printQRInTerminal: true,
-      generateHighQualityLinkPreview: true,
-      markOnlineOnConnect: true,
       connectTimeoutMs: 360000,
       keepAliveIntervalMs: 15000,
-      retryRequestDelayMs: 500,
-      options: {
-        timeout: 240000,
-      },
+      retryRequestDelayMs: 6000,
+      markOnlineOnConnect: false,
+      generateHighQualityLinkPreview: true,
+      linkPreviewImageThumbnailWidth: 852,
+      logger: pino({ level: "silent", enabled: false }),
+      browser: Browsers.appropriate("Desktop"),
+      shouldIgnoreJid: (jid) => jid.includes("status@broadcast"),
     };
   }
 

@@ -25,7 +25,7 @@ export class SessionService {
   }
 
   private startSession(
-    sessionId: string
+    sessionId: string,
   ): Promise<{ qrcode: string; status: "open" | "close" | "pending" }> {
     const worker = this.createWorker(sessionId);
     return new Promise((resolve, reject) => {
@@ -53,7 +53,7 @@ export class SessionService {
   async sendText(
     sessionId: string,
     message: AnyMessageContent,
-    receivers: string[]
+    receivers: string[],
   ) {
     const worker = this.sessions.get(sessionId);
     if (!worker) return;
